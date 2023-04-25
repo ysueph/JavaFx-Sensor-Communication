@@ -23,21 +23,31 @@ public class Main extends Application {
     public static void main(String[] args) throws Exception{
         launch(args);
         
-        ServerSocket serverSocket = new ServerSocket(404);
-        Socket clientSocket = serverSocket.accept();
+
+        int port = 4444;
+        ServerSocket serverSocket = new ServerSocket(port);
+        System.out.println("Sunucu port numarasini dinliyor.. " + port);
+
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            System.out.println("istemciye baglandi " + clientSocket.getInetAddress());
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println("istemciden gelen mesaj: " + inputLine);
+            }
+
+            in.close();
+            System.out.println("mesaj gonderimi tamamlandi.");
+            clientSocket.close();
+            System.out.println("baglanti kesildi...");
+        }
         
-
-        InputStream in = clientSocket.getInputStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead = in.read(buffer);
-        String data = new String(buffer, 0, bytesRead);
-        String[] parts = data.split("\\|");
-        String s1 = parts[0];
-        String s2 = parts[1];
-        System.out.println("kirmizi " + s1);
-        System.out.println("sari " + s2);
-
-        clientSocket.close();
-        serverSocket.close();
     }
-}
+        
+        
+    }
+    
+
+    

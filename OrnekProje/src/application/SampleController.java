@@ -1,14 +1,14 @@
 package application;
 
+
+
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -25,11 +25,13 @@ public class SampleController {
     private Circle kırmızı;
     private Circle sarı;
     private Circle hedef;
+   
+
     
     
     int sayac=0;
 
-    public void initialize() throws IOException {
+    public void initialize() throws  IOException{
         // kırmızı sensör
         kırmızı = new Circle(10, Color.RED);
         anchorPane.getChildren().add(kırmızı);
@@ -51,6 +53,7 @@ public class SampleController {
         AnchorPane.setLeftAnchor(hedef, (double) rand.nextInt(500));
         AnchorPane.setTopAnchor(hedef, (double) rand.nextInt(500));
         
+       
         
         
     }
@@ -60,13 +63,17 @@ public class SampleController {
     @FXML
     public void hesapla() throws IOException {
         // konum
-    	double kırmızıX = AnchorPane.getLeftAnchor(kırmızı) + kırmızı.getRadius();
-        double kırmızıY = AnchorPane.getTopAnchor(kırmızı) + kırmızı.getRadius();
-        double sarıX = AnchorPane.getLeftAnchor(sarı) + sarı.getRadius();
-        double sarıY = AnchorPane.getTopAnchor(sarı) + sarı.getRadius();
-        double hedefX = AnchorPane.getLeftAnchor(hedef) + hedef.getRadius();
-        double hedefY = AnchorPane.getTopAnchor(hedef) + hedef.getRadius();
+    	double ortaNoktaX = anchorPane.getWidth() / 2;
+    	double ortaNoktaY = anchorPane.getHeight() / 2;
 
+    	double kırmızıX = AnchorPane.getLeftAnchor(kırmızı) + kırmızı.getRadius() - ortaNoktaX;
+    	double kırmızıY = ortaNoktaY - AnchorPane.getTopAnchor(kırmızı) - kırmızı.getRadius();
+
+    	double sarıX = AnchorPane.getLeftAnchor(sarı) + sarı.getRadius() - ortaNoktaX;
+    	double sarıY = ortaNoktaY - AnchorPane.getTopAnchor(sarı) - sarı.getRadius();
+
+    	double hedefX = AnchorPane.getLeftAnchor(hedef) + hedef.getRadius() - ortaNoktaX;
+    	double hedefY = ortaNoktaY - AnchorPane.getTopAnchor(hedef) - hedef.getRadius();
         
         double KırmızıUzaklıkX = (hedefX - kırmızıX);
         double KırmızıUzaklıkY = (hedefY - kırmızıY);
@@ -95,20 +102,25 @@ public class SampleController {
         textArea.appendText("***************");
         sayac++;
         textArea.appendText(" "+sayac+". hesaplama\n");
-       
-        //tcp/ip 
-       
-            Socket clientSocket = new Socket("localhost", 404);
-
-            OutputStream outputStream = clientSocket.getOutputStream();
-            String krmz= "kırmızı: (" + kırmızıX + "," + kırmızıY + ")";
-            String sari= "sarı: (" + sarıX + "," + sarıY + ")";
-            
-            String veri= krmz + "|" + sari;
-            outputStream.write(veri.getBytes());
-            clientSocket.close();
-    }
         
+       
+        //tcp/ip       
+        String serverAddress = "localhost";
+        int port = 4444;
+        Socket socket = new Socket(serverAddress, port);
+
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        out.println("kirmizi konum: "+ "x(" + kırmızıX + "), y(" + kırmızıY + ")");
+
+        out.println("sari konum: "+ "x(" + sarıX + "), y(" + sarıY + ")");
+
+        out.close();
+        socket.close();
+    
+            
+    }
+    
+    
     
     @FXML
     public void yenile() {
